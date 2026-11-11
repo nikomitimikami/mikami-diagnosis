@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>私にも、できるかも。未来づくり診断</title>
+<style>
+:root{--bg:#fff8ec;--ink:#493126;--pink:#e96878;--deep:#c9475b;--pale:#fce3e6;--line:#d5a196}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,sans-serif;line-height:1.75}
+main{max-width:720px;width:calc(100% - 24px);margin:18px auto 40px}.box{background:#fffdfb;border:2px solid #e5bdb3;border-radius:20px;padding:clamp(18px,5vw,32px);box-shadow:0 8px 24px #49312618}
+.k{color:var(--deep);font-weight:850;letter-spacing:.1em;font-size:.85rem}h1{font-size:clamp(1.7rem,6vw,2.3rem);line-height:1.4;color:#57372c;margin:.35em 0}h2{font-size:1.3rem;line-height:1.5}p{margin:.6em 0}.note,small{color:#735d52;font-size:.9rem}
+button{border:0;border-radius:13px;padding:13px 17px;font:inherit;font-weight:800;cursor:pointer}.primary{background:var(--pink);color:white;box-shadow:0 4px 0 var(--deep)}.secondary{background:#fff0e7;color:#704638;border:2px solid #d7a18f}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}.actions button{flex:1;min-width:125px}
+.progress{height:11px;background:#f0ded5;border-radius:20px;overflow:hidden;margin:14px 0 20px}.bar{height:100%;width:0;background:linear-gradient(90deg,var(--pink),#f29a55)}
+.options{display:grid;gap:10px;margin:16px 0}.opt{display:flex;gap:10px;text-align:left;align-items:flex-start;background:#fffcf8;color:var(--ink);border:2px solid #d4aa9f;border-radius:14px;padding:12px;font-weight:650;line-height:1.55}.opt.sel{background:var(--pale);border:2px solid var(--deep)}.badge{display:grid;place-items:center;flex:0 0 29px;height:29px;border-radius:50%;background:#f4d0c7;font-weight:900}.sel .badge{background:var(--deep);color:white}
+textarea{width:100%;min-height:95px;border:2px solid #c98f83;border-radius:12px;padding:12px;font:inherit;color:var(--ink);background:#fffcf8}
+.card{background:#fff5ef;border:2px solid #e5b4a6;border-radius:16px;padding:18px;margin:16px 0}.type{display:inline-block;background:var(--pale);color:#96394a;border-radius:30px;padding:4px 12px;font-weight:850}
+.work{border-top:2px dashed #e2c1b7;padding:16px 0}.work label{display:block;font-weight:850}.work textarea{margin-top:8px;min-height:72px}.hide{display:none!important}footer{text-align:center;color:#735d52;font-size:.82rem;margin:16px}
+@media(max-width:420px){main{width:calc(100% - 16px);margin:9px auto 24px}.box{padding:17px}}
+</style></head><body><main>
+<section class="box" id="intro"><div class="k">MIKAMI · FUTURE WORK</div><h1>私にも、できるかも。</h1>
+<p><b>私を大切にしながら、これからの未来を見つける診断</b></p>
+<p>今のあなたの気持ちに近いものを選びながら、自分のこれからを一緒に見つけていきましょう。</p>
+<p class="note">正解・不正解はありません。今の気持ちに一番近いものを選んでね。LINEで受け取った方は、そのまま診断を始めてください。</p>
+<div class="actions"><button class="primary" id="start">診断をはじめる</button></div></section>
+<section class="box hide" id="quiz"><div class="k">FUTURE DIAGNOSIS</div><b id="qnum"></b><div class="progress"><div class="bar" id="bar"></div></div><h2 id="q"></h2><div class="options" id="opts"></div>
+<div id="other" class="hide"><b>今の気持ちを自由に書いてみてね</b><textarea id="otherText" placeholder="うまくまとまらなくても大丈夫。そのまま書いてね。"></textarea><p class="note">自由記入は診断の点数には加えず、結果画面に表示します。</p></div>
+<div class="actions"><button class="secondary" id="back">戻る</button><button class="primary" id="next" disabled>次へ</button></div></section>
+<section class="box hide" id="result"><div class="k">YOUR RESULT</div><h1>今のあなたの診断結果</h1><div class="card" id="resultCard"></div><div class="card hide" id="written"></div>
+<h2>これからの未来づくりワーク</h2><p>全部書かなくても大丈夫。気になるところから、あなたのペースで書いてみてね。</p><div id="works"></div>
+<div class="actions"><button class="primary" id="save">診断結果を画像で保存</button><button class="secondary" id="copy">ワークの回答をコピー</button></div>
+<p class="note">画像には診断タイプと結果メッセージが入ります。ワークの回答は画像に含まれません。</p>
+<div class="actions"><button class="secondary" id="line">公式LINEを見る</button><button class="secondary" id="restart">もう一度診断する</button></div></section>
+<footer>あなた自身の人生も、大切にしていい。</footer></main>
+<script>
+const LINE_URL="https://lin.ee/ここに公式LINEのURLを設定";
+const Q=[
+["今のあなたに一番近い気持ちは？",["毎日が精一杯。自分のことを考える余裕がない","何か始めたいけれど、私には無理かもしれない","好きなことを見つけたいけれど、自分が何を好きかわからない","これまでの経験を誰かの役に立てられたらいいな","やりたいことはあるけれど、何から始めればいいかわからない"]],
+["もし自分のための時間が1時間増えたら？",["何も考えず、ゆっくり休みたい","自分にできることを探してみたい","好きなことや趣味を楽しみたい","誰かと話したり、自分の経験を伝えたりしたい","未来につながることを学んだり、行動したりしたい"]],
+["自分のことを、どう感じていますか？",["自分のことはいつも後回しになっている","私には特別な才能や資格がないと思う","好きなことはあるけれど、自信が持てない","人に話せる経験や、伝えられることがあると思う","自信はまだないけれど、何かに挑戦してみたい"]],
+["これまでの経験について、どう思いますか？",["振り返る余裕もないくらい、毎日を頑張ってきた","経験はあるけれど、自分には価値がない気がする","昔好きだったことや、夢中になれたことを思い出したい","自分の経験が誰かの助けになるかもしれない","これまでの経験を何かの形にしてみたい"]],
+["これから、どんな未来を増やしたい？",["自分の時間や心の余裕を増やしたい","自分にもできることがあると感じたい","好きなことを楽しみ、自分らしく過ごしたい","誰かの役に立ち、同じ想いを持つ仲間とつながりたい","家で働き、自分の収入をつくりたい"]],
+["今のあなたが、これから始めてみたいことは？",["まずは自分の心と身体を大切にしたい","自分の好きなことや得意なことを見つけたい","これまでの経験や頑張ってきたことを振り返りたい","同じような経験をした人とつながったり、誰かの役に立つことをしてみたい","好きなことを仕事にしたり、自分の収入につながることを始めたい","その他（自由に書いてみる）"]]
+];
+const R={
+A:["心の余白をつくるタイプ","まずは、あなた自身を大切にすることから。","毎日、目の前のことに一生懸命向き合ってきたんだね。今は何かを始める前に、休むことや誰かに頼ることも大切な一歩。","今日、自分のために5分だけ何もしない時間をつくってみよう。"],
+B:["自分の可能性を見つけるタイプ","あなたの中には、まだ気づいていない力があるかもしれない。","資格や特別な才能がなくても、これまで乗り越えてきたことや工夫してきたことは、あなたの大切な力。","これまでに頑張ったことを、ひとつだけ書き出してみよう。"],
+C:["好きを見つけるタイプ","小さな「好き」を大切にしてみよう。","好きなことは、最初から大きな夢でなくていいよ。気になること、少し心が動くことから探してみよう。","昔好きだったことや、最近気になっていることを3つ書いてみよう。"],
+D:["経験を宝物に変えるタイプ","あなたの経験が、誰かの希望につながるかもしれない。","あなたが歩いてきた道のりには、同じような思いをしている人に届けられる言葉や知恵があるかもしれない。","自分が経験してきたことの中で、誰かに伝えたいことをひとつ書いてみよう。"],
+E:["未来への一歩を踏み出すタイプ","「やってみたい」という気持ちを、小さな行動に変えてみよう。","最初から完璧じゃなくて大丈夫。好きなことや経験を、これからの働き方や収入につなげる道を少しずつ探していこう。","気になっていることをひとつ調べる、誰かに相談するなど、できることを一つ選ぼう。"]
+};
+const W=[
+["1. まずは私を大切にする","どんな時間があったら、少しほっとできそう？休むこと・誰かに頼ることも含めて考えてみよう。"],
+["2. 私の経験を見つける","これまで経験したこと、乗り越えたこと、工夫してきたことは何だろう？"],
+["3. 私の好き・できるを見つける","好きなこと、得意なこと、やってみたいこと。小さなことでも書いてみよう。"],
+["4. どんな未来をつくりたい？","収入や時間に少し余裕ができたら、どんな時間を増やしたい？家族や自分のために叶えたいことは？"],
+["5. 私にもできるかも","今日または今週できそうな、小さな一歩は何だろう？"]
+];
+let i=0,A=Array(6).fill(null),otherValue="",chosen=null;const $=x=>document.getElementById(x);
+function show(id){["intro","quiz","result"].forEach(x=>$(x).classList.toggle("hide",x!==id));window.scrollTo(0,0)}
+function draw(){ $("qnum").textContent=`QUESTION ${i+1} / 6`; $("bar").style.width=((i+1)/6*100)+"%";$("q").textContent=Q[i][0];$("opts").innerHTML="";
+Q[i][1].forEach((label,j)=>{let letter="ABCDEF"[j],b=document.createElement("button");b.className="opt"+(A[i]===letter?" sel":"");b.type="button";let badge=document.createElement("span");badge.className="badge";badge.textContent=letter;let t=document.createElement("span");t.textContent=label;b.append(badge,t);b.onclick=()=>{A[i]=letter;draw()};$("opts").append(b)});
+$("other").classList.toggle("hide",!(i===5&&A[i]==="F"));$("otherText").value=otherValue;$("back").disabled=i===0;$("next").disabled=!A[i]||(i===5&&A[i]==="F"&&!otherValue.trim());$("next").textContent=i===5?"診断結果を見る":"次へ";}
+function esc(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function finish(){let counts={A:0,B:0,C:0,D:0,E:0};A.forEach(x=>{if(counts[x]!==undefined)counts[x]++});let max=Math.max(...Object.values(counts)),ties=Object.keys(counts).filter(x=>counts[x]===max),win=ties[0];[5,4,0].some(n=>{if(ties.includes(A[n])){win=A[n];return true}return false});chosen=win;
+let r=R[win];$("resultCard").innerHTML=`<span class="type">TYPE 0${"ABCDE".indexOf(win)+1}</span><h2>${r[0]}</h2><p><b>${r[1]}</b></p><p>${r[2]}</p><p><b>今日の小さな一歩：</b>${r[3]}</p>`;
+$("written").classList.toggle("hide",A[5]!=="F");if(A[5]==="F")$("written").innerHTML="<b>あなたが書いてくれた言葉</b><p>"+esc(otherValue)+"</p>";
+$("works").innerHTML="";W.forEach((w,n)=>{let d=document.createElement("div");d.className="work";let l=document.createElement("label");l.textContent=w[0];let s=document.createElement("small");s.textContent=w[1];let t=document.createElement("textarea");t.dataset.work=n;t.placeholder="思いつくことを自由に書いてね";d.append(l,s,t);$("works").append(d)});show("result")}
+$("start").onclick=()=>{i=0;show("quiz");draw()};$("back").onclick=()=>{if(i>0){i--;draw()}};$("next").onclick=()=>{if(i<5){i++;draw()}else finish()};
+$("otherText").oninput=e=>{otherValue=e.target.value;$("next").disabled=!otherValue.trim()};
+$("restart").onclick=()=>{i=0;A=Array(6).fill(null);otherValue="";chosen=null;show("intro")};
+$("copy").onclick=async()=>{let s=[...document.querySelectorAll("[data-work]")].map((x,n)=>W[n][0]+"\n"+x.value).join("\n\n");try{await navigator.clipboard.writeText(s);alert("ワークの回答をコピーしました。")}catch(e){alert(s)}};
+$("line").onclick=()=>{if(LINE_URL.includes("ここに公式LINE"))alert("公開前にLINE_URLへ公式LINEのURLを設定してください。");else window.open(LINE_URL,"_blank","noopener")};
+$("save").onclick=()=>{let r=R[chosen],c=document.createElement("canvas"),x=c.getContext("2d");c.width=1000;c.height=1100;x.fillStyle="#fff8ec";x.fillRect(0,0,1000,1100);x.textAlign="center";x.fillStyle="#493126";x.font="bold 48px sans-serif";x.fillText("私にも、できるかも。",500,100);x.fillStyle="#c9475b";x.font="bold 34px sans-serif";x.fillText("あなたの診断結果",500,175);x.fillStyle="#57372c";x.font="bold 40px sans-serif";let y=275;[r[0],r[1],r[2],"今日の小さな一歩："+r[3]].forEach((s,n)=>{let lines=[],line="";for(let ch of s){if(x.measureText(line+ch).width>820&&line){lines.push(line);line=ch}else line+=ch}if(line)lines.push(line);x.font=n===0?"bold 40px sans-serif":"30px sans-serif";lines.forEach(t=>{x.fillText(t,500,y);y+=48});y+=22});x.fillStyle="#735d52";x.font="26px sans-serif";x.fillText("あなた自身の人生も、大切にしていい。",500,1050);let a=document.createElement("a");a.download="mikami-diagnosis-result.png";a.href=c.toDataURL("image/png");a.click()};
+</script></body></html>
